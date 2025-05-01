@@ -21,7 +21,11 @@ for i in sent:
 grammar = {}
 
 tabla = {}
+print("Cadena inicial: ",start)
+print("Variables: ",variables)
+print("Terminales: ", terminales, "\n")
 
+# SCANNER
 for i in start + variables:
     tabla[i]={}
     for j in terminales:
@@ -37,7 +41,10 @@ for j in terminales:
 for j in variables:
     grammar[j]={"tipo":"V","first":[],"follow":[]}
 
+# END SCANNER
 
+
+# DICCIONARIO DE REGLAS
 archivo = open("grammar.txt","r")
 sent = archivo.readlines()
 reglas ={}
@@ -64,7 +71,7 @@ for i in reglas.keys():
             reglas[i]['Der'].append(k)
     j+=1
 
-
+# first - regla 1
 for i in grammar.keys():
     if grammar[i]['tipo']=="T":
         grammar[i]['first'].append(i)
@@ -73,6 +80,7 @@ for i in grammar.keys():
             if reglas[k]['Izq'] == i:
                 grammar[i]['first']=grammar[reglas[k]['Der'][0]]['first']
 
+# first - regla 
 for i in grammar.keys():
     for k in reglas.keys():
         if reglas[k]['Izq'] == i:
@@ -82,21 +90,23 @@ for i in grammar.keys():
     if grammar[i]["tipo"]=="V" or grammar[i]["tipo"]=="I" :
         print(i)"""
 
+# regla 2 follows:  first(L) - {''} C follow(A)
 for i in reglas.keys():
     for j in range(len(reglas[i]['Der'])-1):
-        if grammar[reglas[i]['Der'][j]]["tipo"]=="V" and grammar[reglas[i]['Der'][j+1]]["tipo"]=="V":
+        if grammar[reglas[i]['Der'][j]]["tipo"]=="V":
             grammar[reglas[i]['Der'][j]]["follow"]+=grammar[reglas[i]['Der'][j+1]]['first']
             
-
+# regla 3 follows: follow(B) C follow(A)
 for i in reglas.keys():
     if grammar[reglas[i]['Der'][-1]]['tipo']=="V":
         grammar[reglas[i]['Der'][-1]]["follow"]+=grammar[reglas[i]['Izq'][0]]["follow"]
 
-
+# TABLA
 for i in reglas.keys():
     for j in  grammar[reglas[i]['Der'][0]]['first']:
         tabla[reglas[i]['Izq'][0]][j].append(reglas[i])
 
+print("Reglas: ",reglas)
 
 #################
 print("TABLA")
@@ -166,3 +176,5 @@ while True:
     else:
         print("Cadena no valida")
         break
+
+print("Gramática:", grammar)
