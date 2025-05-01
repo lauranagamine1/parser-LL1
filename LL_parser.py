@@ -11,14 +11,13 @@ print(sent)
 
 # SCANNER
 for production in sent:
-    tokens = production.split()  # CAMBIO 2: separar por espacios
+    tokens = production.split() # tokens separa todo
     for tok in tokens:
-        # token es variable si es una sola letra mayúscula != epsilon
         if tok.isalpha() and tok.isupper() and tok != "'":
             if tok not in variables and tok not in start:
                 variables.append(tok)
         else:
-            # cualquier otro token (minúscula, dígito, "'" epsilon)
+            # cualquier otro token (minuscula, digito, "'" epsilon)
             if tok == "->":
                 pass
             elif tok == "|":
