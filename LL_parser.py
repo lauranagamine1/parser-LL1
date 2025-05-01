@@ -7,16 +7,23 @@ variables = []
 terminales = []
 start = [sent[0][0]]
 for i in range(len(sent)):
-    sent[i] = re.sub('[^\\w]', '', sent[i])
+    sent[i] = re.sub(r'[ \|\-\>]', '', sent[i]) # elimmina espacios, |, ->
     sent[i] = re.sub(r'\s+', '', sent[i])
+print(sent)
+
+# SCANNER
+
 for i in sent:
     for j in i:
-        if j==j.upper():
-            if not(j in variables) and not(j in start):
+        if j==j.upper() and j != "'":
+            if not(j in variables) and not(j in start) and not(j in terminales):
                 variables.append(j)
         else:
             if not(j in terminales):
                 terminales.append(j)
+
+print("Sent:", sent)
+
 #gramatica
 grammar = {}
 
@@ -25,7 +32,7 @@ print("Cadena inicial: ",start)
 print("Variables: ",variables)
 print("Terminales: ", terminales, "\n")
 
-# SCANNER
+
 for i in start + variables:
     tabla[i]={}
     for j in terminales:

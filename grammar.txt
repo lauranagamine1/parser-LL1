@@ -1,5 +1,2 @@
-S -> A B B C
-A -> a
-B -> b 
-B -> c
-C -> d
+S -> a A c
+A -> b A | '
