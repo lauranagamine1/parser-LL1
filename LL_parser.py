@@ -101,7 +101,7 @@ for i in grammar.keys():
 print("Gramatica: ", grammar)
 
 # regla 2: incluir first de otro no terminal
-order = [start[0]] + list(reversed(variables))
+order = variables + [start[0]] 
 for A in order:
     if grammar[A]['tipo'] in ('V', 'I'):
         first_set = []
@@ -130,15 +130,25 @@ for A in order:
         grammar[A]['first'] = first_set
 
 # regla 2 follows:  first(L) - {''} C follow(A)
-for i in reglas.keys():
-    for j in range(len(reglas[i]['Der'])-1):
-        if grammar[reglas[i]['Der'][j]]["tipo"]=="V":
-            grammar[reglas[i]['Der'][j]]["follow"]+=grammar[reglas[i]['Der'][j+1]]['first']
-            
+for k in reglas.keys():
+    deriv = reglas[k]['Der']
+    for idx in range(len(deriv)-1):
+        B = deriv[idx]
+        beta = deriv[idx+1]
+        if grammar[B]['tipo'] == "V":
+            for f in grammar[beta]['first']:
+                if f != "'" and f not in grammar[B]['follow']:
+                    grammar[B]['follow'].append(f)
+
 # regla 3 follows: follow(B) C follow(A)
-for i in reglas.keys():
-    if grammar[reglas[i]['Der'][-1]]['tipo']=="V":
-        grammar[reglas[i]['Der'][-1]]["follow"]+=grammar[reglas[i]['Izq'][0]]["follow"]
+for k in reglas.keys():
+    deriv = reglas[k]['Der']
+    if deriv and grammar[deriv[-1]]['tipo'] == "V":
+        B = deriv[-1]
+        A = reglas[k]['Izq']
+        for f in grammar[A]['follow']:
+            if f not in grammar[B]['follow']:
+                grammar[B]['follow'].append(f)
 
 # TABLA
 for i in reglas.keys():
