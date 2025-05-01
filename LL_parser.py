@@ -51,8 +51,20 @@ for j in variables:
 # DICCIONARIO DE REGLAS
 archivo = open("grammar.txt","r")
 sent = archivo.readlines()
+print(sent)
 reglas ={}
 i=1
+
+expanded = []
+for line in sent:
+    line = line.strip()
+    if '->' not in line:
+        continue
+    lhs, rhs = line.split('->', 1)
+    # separada por |, indica que es un nuevo no terminal
+    for alt in rhs.split('|'):
+        expanded.append(f"{lhs}->{alt.strip()}")
+sent = expanded
 
 for i in range(len(sent)):
     reglas['regla'+str(i+1)] = {}
@@ -77,7 +89,7 @@ for i in reglas.keys():
 print(reglas)
 
 # FIRST
-# regla 1: si x es un terminal, entonces first(x) = {x}
+# regla 1: terminal
 for i in grammar.keys():
     if grammar[i]['tipo']=="T":
         grammar[i]['first'].append(i)
@@ -89,22 +101,27 @@ for i in grammar.keys():
 print("Gramatica: ", grammar)
 
 # regla 2: incluir first de otro no terminal
-for A in grammar:
-    if grammar[A]['tipo'] in ("V", "I"):
+for A in grammar.keys():
+    if grammar[A]['tipo'] in ('V', 'I'):
         first_set = []
-        for r in reglas:
-            if reglas[r]['Izq'] == A:
-                deriv = reglas[r]['Der']
-                if "'" in deriv and "'" not in first_set: # asumiendo que e va solo?
-                    first_set.append("'")
-                for symr in deriv:
-                    if symr == "'":
-                        continue
-                    for f in grammar[symr]['first']:
-                        if f not in first_set:
+        for key in reglas.keys():
+            if reglas[key]['Izq'] == A:
+                deriv = reglas[key]['Der']
+                if not deriv:
+                    if "'" not in first_set:
+                        first_set.append("'") 
+                    continue
+                include_eps = True
+                for sym in deriv:
+                    for f in grammar[sym]['first']:
+                        if f != "'" and f not in first_set:
                             first_set.append(f)
-                    if "'" not in grammar[symr]['first']:
-                        break
+                    if "'" in grammar[sym]['first']:
+                        continue
+                    include_eps = False
+                    break
+                if include_eps and "'" not in first_set:
+                    first_set.append("'")  
         grammar[A]['first'] = first_set
 
 # regla 2 follows:  first(L) - {''} C follow(A)
