@@ -6,23 +6,25 @@ sent = archivo.readlines()
 variables = []
 terminales = []
 start = [sent[0][0]]
-for i in range(len(sent)):
-    sent[i] = re.sub(r'[ \|\-\>]', '', sent[i]) # elimmina espacios, |, ->
-    sent[i] = re.sub(r'\s+', '', sent[i])
+
 print(sent)
 
 # SCANNER
-
-for i in sent:
-    for j in i:
-        if j==j.upper() and j != "'":
-            if not(j in variables) and not(j in start) and not(j in terminales):
-                variables.append(j)
+for production in sent:
+    tokens = production.split()  # CAMBIO 2: separar por espacios
+    for tok in tokens:
+        # token es variable si es una sola letra mayúscula != epsilon
+        if tok.isalpha() and tok.isupper() and tok != "'":
+            if tok not in variables and tok not in start:
+                variables.append(tok)
         else:
-            if not(j in terminales):
-                terminales.append(j)
-
-print("Sent:", sent)
+            # cualquier otro token (minúscula, dígito, "'" epsilon)
+            if tok == "->":
+                pass
+            elif tok == "|":
+                pass
+            elif tok not in terminales:
+                terminales.append(tok)
 
 #gramatica
 grammar = {}
@@ -31,7 +33,6 @@ tabla = {}
 print("Cadena inicial: ",start)
 print("Variables: ",variables)
 print("Terminales: ", terminales, "\n")
-
 
 for i in start + variables:
     tabla[i]={}
@@ -47,9 +48,6 @@ for j in terminales:
 
 for j in variables:
     grammar[j]={"tipo":"V","first":[],"follow":[]}
-
-# END SCANNER
-
 
 # DICCIONARIO DE REGLAS
 archivo = open("grammar.txt","r")
