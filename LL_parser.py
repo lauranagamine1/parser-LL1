@@ -5,9 +5,9 @@ archivo = open("grammar.txt","r")
 sent = archivo.readlines()
 variables = []
 terminales = []
-start = [sent[0][0]]
 
-print(sent)
+t1 = sent[0].split()
+start = [t1[0]]
 
 # SCANNER
 for production in sent:
@@ -65,7 +65,6 @@ for i in reglas.keys():
 
 for i in range(len(sent)):
     sent[i]= sent[i][2:]
-
 j=0
 
 for i in reglas.keys():
@@ -75,7 +74,10 @@ for i in reglas.keys():
             reglas[i]['Der'].append(k)
     j+=1
 
-# first - regla 1
+print(reglas)
+
+# FIRST
+# regla 1: si x es un terminal, entonces first(x) = {x}
 for i in grammar.keys():
     if grammar[i]['tipo']=="T":
         grammar[i]['first'].append(i)
@@ -84,15 +86,26 @@ for i in grammar.keys():
             if reglas[k]['Izq'] == i:
                 grammar[i]['first']=grammar[reglas[k]['Der'][0]]['first']
 
-# first - regla 
-for i in grammar.keys():
-    for k in reglas.keys():
-        if reglas[k]['Izq'] == i:
-            grammar[i]['first']=  list(set(grammar[i]['first']) | set(grammar[reglas[k]['Der'][0]]['first']))
+print("Gramatica: ", grammar)
 
-"""for i in grammar.keys():
-    if grammar[i]["tipo"]=="V" or grammar[i]["tipo"]=="I" :
-        print(i)"""
+# regla 2: incluir first de otro no terminal
+for A in grammar:
+    if grammar[A]['tipo'] in ("V", "I"):
+        first_set = []
+        for r in reglas:
+            if reglas[r]['Izq'] == A:
+                deriv = reglas[r]['Der']
+                if "'" in deriv and "'" not in first_set: # asumiendo que e va solo?
+                    first_set.append("'")
+                for symr in deriv:
+                    if symr == "'":
+                        continue
+                    for f in grammar[symr]['first']:
+                        if f not in first_set:
+                            first_set.append(f)
+                    if "'" not in grammar[symr]['first']:
+                        break
+        grammar[A]['first'] = first_set
 
 # regla 2 follows:  first(L) - {''} C follow(A)
 for i in reglas.keys():
