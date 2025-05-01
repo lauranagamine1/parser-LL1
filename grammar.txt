@@ -1,4 +1,3 @@
 S -> a A c
-A -> b A | '
-B -> aa | papas fritas | '
-SS -> aaaaaaaa
+A -> b A | k | C
+C -> p | o | l | '

@@ -101,27 +101,32 @@ for i in grammar.keys():
 print("Gramatica: ", grammar)
 
 # regla 2: incluir first de otro no terminal
-for A in grammar.keys():
+order = [start[0]] + list(reversed(variables))
+for A in order:
     if grammar[A]['tipo'] in ('V', 'I'):
         first_set = []
         for key in reglas.keys():
             if reglas[key]['Izq'] == A:
                 deriv = reglas[key]['Der']
+                # producción vacía
                 if not deriv:
                     if "'" not in first_set:
-                        first_set.append("'") 
+                        first_set.append("'")
                     continue
                 include_eps = True
                 for sym in deriv:
+                    # agregar firsts menos e
                     for f in grammar[sym]['first']:
                         if f != "'" and f not in first_set:
                             first_set.append(f)
+                    # si sym no deriva e, detiene todo
                     if "'" in grammar[sym]['first']:
                         continue
                     include_eps = False
                     break
+                # si todos derivan e, incluir e
                 if include_eps and "'" not in first_set:
-                    first_set.append("'")  
+                    first_set.append("'")
         grammar[A]['first'] = first_set
 
 # regla 2 follows:  first(L) - {''} C follow(A)
