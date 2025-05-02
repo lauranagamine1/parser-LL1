@@ -86,7 +86,7 @@ for i in reglas.keys():
             reglas[i]['Der'].append(k)
     j+=1
 
-print(reglas)
+print("Reglas: ", reglas)
 
 # FIRST
 # regla 1: terminal
@@ -98,7 +98,6 @@ for i in grammar.keys():
             if reglas[k]['Izq'] == i:
                 grammar[i]['first']=grammar[reglas[k]['Der'][0]]['first']
 
-print("Gramatica: ", grammar)
 
 # regla 2: incluir first de otro no terminal
 order = variables + [start[0]] 
@@ -151,79 +150,68 @@ for k in reglas.keys():
                 grammar[B]['follow'].append(f)
 
 # TABLA
-for i in reglas.keys():
-    for j in  grammar[reglas[i]['Der'][0]]['first']:
-        tabla[reglas[i]['Izq'][0]][j].append(reglas[i])
+for key, rule in reglas.items():
+    A = rule['Izq']
+    deriv = rule['Der']
+    if not deriv: 
+        continue
+    rhs_str = ' '.join(deriv) if deriv else "''"
+    first0 = grammar[deriv[0]]['first']
+    for f in first0:
+        if f != "'":
+            tabla[A][f].append(key)
+        else:
+            for fol in grammar[A]['follow']:
+                tabla[A][fol].append(key)
 
-print("Reglas: ",reglas)
-
-#################
-print("TABLA")
-print("\n")
-print(f"{'Símbolo':<10} {'Tipo':<8} {'FIRST':<20} {'FOLLOW':<20}")
-print("-" * 60)
-
-for simbolo, datos in grammar.items():
-    tipo = datos['tipo']
-    first = ", ".join(datos.get('first', []))
-    follow = ", ".join(datos.get('follow', [])) if 'follow' in datos else "-"
-    print(f"{simbolo:<10} {tipo:<8} {first:<20} {follow:<20}")
-
-##################
-print("\n")
-print("\n")
-print("MATRIZ")
-
-terminales.append("$")
-print(f"{'':20}", end="")
-for t in terminales:
-    print(f"{t:<20}", end="")
-print()
-
-print("-" * (12 + 20 * len(terminales)))
-for no_terminal, reglas in tabla.items():
-    print(f"{no_terminal:20}", end="")
-    for t in terminales:
-        producciones = reglas[t]
-        if producciones:
-            produccion_strs = ["{} → {}".format(p["Izq"], " ".join(p["Der"])) for p in producciones]
-            print(f"{' / '.join(produccion_strs):<20}", end="")
+print(f"{'':20}" + ''.join(f"{t:<20}" for t in terminales+['$']))
+print("-"*(20*(len(terminales)+1)))
+for nt, row in tabla.items():
+    print(f"{nt:20}", end="")
+    for t in terminales + ['$']:
+        prods = row[t]
+        if prods:
+            # traducimos cada clave a su producción completa
+            prod_strs = [
+                f"{reglas[p]['Izq']} -> {' '.join(reglas[p]['Der'])}"
+                for p in prods
+            ]
+            print(f"{' / '.join(prod_strs):<20}", end="")
         else:
             print(f"{'-':<20}", end="")
     print()
 
 
-###########
-code = open("input.txt","r")
-sent = code.readlines()
-
-cadena = sent[0]+"$"
-pila = start
-
-##################
-print("\n")
-print("\n")
-print("ANALISIS")
-
+# ANÁLISIS LL(1)
+print("\nANÁLISIS")
+with open("input.txt") as f:
+    inp = f.readline().strip() + '$'
+pila = start.copy()
+entrada = inp
 while True:
-    pila_str = ' '.join(pila)
-    entrada_str = ''.join(cadena)
-    if (len(cadena)==1) and (len(pila)==0):
+    if not entrada or not pila:
         print("CADENA VALIDA")
         break
-    if (grammar[pila[-1]]["tipo"] in ["I","V"]) and (len(tabla[pila[-1]][cadena[0]])>=1):
-        produccion = tabla[pila[-1]][cadena[0]][0]
-        produccion_str = f"{produccion['Izq']} → {' '.join(produccion['Der'])}"
-        print(f"{pila_str:<30} {entrada_str:<30} {'Regla: ' + produccion_str}")
-        a = pila[-1]
+    lookahead = entrada[0]
+    if lookahead.isspace():
+        entrada = entrada[1:]
+        continue
+    top = pila[-1]
+    if grammar[top]['tipo'] in ['I','V'] and lookahead in tabla[top] and tabla[top][lookahead]:
+        pr = tabla[top][lookahead][0]
+        # construimos la cadena de producción completa
+        full = f"{reglas[pr]['Izq']} -> {' '.join(reglas[pr]['Der'])}"
+        print(f"{' '.join(pila):<30}{entrada:<30}Regla: {full}")
+
         pila.pop()
-        pila+=tabla[a][cadena[0]][0]['Der'][::-1]
-    elif (grammar[pila[-1]]["tipo"]=="T") and pila[-1]==cadena[0]:
-        print(f"{pila_str:<30} {entrada_str:<30} {'Match: ' + cadena[0]}")
+        rhs = reglas[pr]['Der']
+        if rhs == ["'"]:
+            continue
+        pila.extend(rhs[::-1])
+    elif grammar[top]['tipo']=='T' and top==lookahead:
+        print(f"{' '.join(pila):<30}{entrada:<30}Match: {lookahead}")
         pila.pop()
-        cadena = cadena[1:] 
+        entrada = entrada[1:]
     else:
         print("Cadena no valida")
         break
-
-print("Gramática:", grammar)

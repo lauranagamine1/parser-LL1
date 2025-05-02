@@ -1,3 +1,4 @@
-S -> a A c
-A -> b A | k | C
-C -> p | o | l | '
+S -> A B C
+A -> a A | '
+B -> b
+C -> c | o
