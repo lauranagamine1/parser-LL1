@@ -149,7 +149,7 @@ for key in reglas:
         beta = deriv[idx+1:]
         beta_derives_epsilon = all("'" in grammar[s]['first'] for s in beta) if beta else True
         if beta_derives_epsilon:
-            # propagar follow(A) a follow(B)
+            # propagar follow(A) aa follow(B)
             for f in grammar[A]['follow']:
                 if f not in grammar[B]['follow']:
                     grammar[B]['follow'].append(f)
