@@ -140,14 +140,19 @@ for k in reglas.keys():
                     grammar[B]['follow'].append(f)
 
 # regla 3 follows: follow(B) C follow(A)
-for k in reglas.keys():
-    deriv = reglas[k]['Der']
-    if deriv and grammar[deriv[-1]]['tipo'] == "V":
-        B = deriv[-1]
-        A = reglas[k]['Izq']
-        for f in grammar[A]['follow']:
-            if f not in grammar[B]['follow']:
-                grammar[B]['follow'].append(f)
+for key in reglas:
+    deriv = reglas[key]['Der']
+    A = reglas[key]['Izq']
+    for idx, B in enumerate(deriv):
+        if grammar[B]['tipo'] != "V":
+            continue
+        beta = deriv[idx+1:]
+        beta_derives_epsilon = all("'" in grammar[s]['first'] for s in beta) if beta else True
+        if beta_derives_epsilon:
+            # propagar follow(A) a follow(B)
+            for f in grammar[A]['follow']:
+                if f not in grammar[B]['follow']:
+                    grammar[B]['follow'].append(f)
 
 # TABLA
 for key, rule in reglas.items():
