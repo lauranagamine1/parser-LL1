@@ -140,19 +140,36 @@ for k in reglas.keys():
                     grammar[B]['follow'].append(f)
 
 # regla 3 follows: follow(B) C follow(A)
-for key in reglas:
-    deriv = reglas[key]['Der']
-    A = reglas[key]['Izq']
-    for idx, B in enumerate(deriv):
-        if grammar[B]['tipo'] != "V":
-            continue
-        beta = deriv[idx+1:]
-        beta_derives_epsilon = all("'" in grammar[s]['first'] for s in beta) if beta else True
-        if beta_derives_epsilon:
-            # propagar follow(A) aa follow(B)
-            for f in grammar[A]['follow']:
-                if f not in grammar[B]['follow']:
-                    grammar[B]['follow'].append(f)
+for _ in range(len(reglas)): # repetimos lo suficiente para asegurar que todos los follow interactuan
+    for key in reglas:
+        deriv = reglas[key]['Der']
+        A = reglas[key]['Izq']
+        for idx, B in enumerate(deriv):
+            if grammar[B]['tipo'] != "V":
+                continue
+            beta = deriv[idx+1:]
+            beta_derives_epsilon = all("'" in grammar[s]['first'] for s in beta) if beta else True
+            if beta_derives_epsilon:
+                # propagar follow(A) aa follow(B)
+                for f in grammar[A]['follow']:
+                    if f not in grammar[B]['follow']:
+                        grammar[B]['follow'].append(f)
+
+
+#################
+print("TABLA")
+print("\n")
+print(f"{'Símbolo':<10} {'Tipo':<8} {'FIRST':<20} {'FOLLOW':<20}")
+print("-" * 60)
+
+for simbolo, datos in grammar.items():
+    tipo = datos['tipo']
+    first = ", ".join(datos.get('first', []))
+    follow = ", ".join(datos.get('follow', [])) if 'follow' in datos else "-"
+    print(f"{simbolo:<10} {tipo:<8} {first:<20} {follow:<20}")
+
+print()
+##################
 
 # TABLA
 for key, rule in reglas.items():
@@ -168,10 +185,13 @@ for key, rule in reglas.items():
         else:
             for fol in grammar[A]['follow']:
                 tabla[A][fol].append(key)
+    
 
 print(f"{'':20}" + ''.join(f"{t:<20}" for t in terminales+['$']))
 print("-"*(20*(len(terminales)+1)))
 for nt, row in tabla.items():
+    #print(nt) 
+    #print(row)
     print(f"{nt:20}", end="")
     for t in terminales + ['$']:
         prods = row[t]
@@ -181,9 +201,15 @@ for nt, row in tabla.items():
                 f"{reglas[p]['Izq']} -> {' '.join(reglas[p]['Der'])}"
                 for p in prods
             ]
+            if(len(prod_strs) > 1):
+                raise Exception("Grammar is not LL(1)")
             print(f"{' / '.join(prod_strs):<20}", end="")
+        elif t == '$':
+            print(f"Extraer", end = "")
+        elif t in grammar[nt]['follow']:
+            print(f"{'Extraer':<20}", end = "")
         else:
-            print(f"{'-':<20}", end="")
+            print(f"{'Explorar':<20}", end="")
     print()
 
 
