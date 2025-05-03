@@ -134,7 +134,7 @@ for k in reglas.keys():
     for idx in range(len(deriv)-1):
         B = deriv[idx]
         beta = deriv[idx+1]
-        if grammar[B]['tipo'] == "V":
+        if grammar[B]['tipo'] in ("V", "I"):
             for f in grammar[beta]['first']:
                 if f != "'" and f not in grammar[B]['follow']:
                     grammar[B]['follow'].append(f)
@@ -145,7 +145,7 @@ for _ in range(len(reglas)): # repetimos lo suficiente para asegurar que todos l
         deriv = reglas[key]['Der']
         A = reglas[key]['Izq']
         for idx, B in enumerate(deriv):
-            if grammar[B]['tipo'] != "V":
+            if grammar[B]['tipo'] not in ("V", "I"):
                 continue
             beta = deriv[idx+1:]
             beta_derives_epsilon = all("'" in grammar[s]['first'] for s in beta) if beta else True

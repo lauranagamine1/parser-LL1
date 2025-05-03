@@ -1,4 +1,3 @@
-S -> A B C
-A -> a A | '
-B -> b
-C -> c | o
+S -> a A | a B
+A -> c
+B -> d
