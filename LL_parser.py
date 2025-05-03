@@ -6,12 +6,14 @@ sent = archivo.readlines()
 variables = []
 terminales = []
 
-t1 = sent[0].split()
+t1 = sent[0].split(" ")
 start = [t1[0]]
+
+print(start)
 
 # SCANNER
 for production in sent:
-    tokens = production.split() # tokens separa todo
+    tokens = production.split(" ") # tokens separa todo
     for tok in tokens:
         if tok.isalpha() and tok.isupper() and tok != "'":
             if tok not in variables and tok not in start:
@@ -66,6 +68,7 @@ for line in sent:
         expanded.append(f"{lhs}->{alt.strip()}")
 sent = expanded
 
+
 for i in range(len(sent)):
     reglas['regla'+str(i+1)] = {}
 
@@ -76,12 +79,15 @@ for i in reglas.keys():
     j+=1
 
 for i in range(len(sent)):
-    sent[i]= sent[i][2:]
+    sent[i]= sent[i][4:]
 j=0
+
+print(sent)
+print(reglas)
 
 for i in reglas.keys():
     reglas[i]['Der'] = []
-    for k in sent[j]:
+    for k in sent[j].split(" "):
         if k in grammar.keys():
             reglas[i]['Der'].append(k)
     j+=1
@@ -217,8 +223,8 @@ valid = True
 # ANÁLISIS LL(1)
 print("\nANÁLISIS")
 with open("input.txt") as f:
-    inp = f.readline().strip() + '$'
-pila = ['$'] + start.copy()
+    inp = f.readline().split(" ") + ["$"]
+pila = ['$', start[0]]
 entrada = inp
 while True:
     if not entrada and not pila:
@@ -234,18 +240,18 @@ while True:
     top = pila[-1]
     if top == '$':
         if lookahead == '$':
-            print(f"{' '.join(pila):<30}{entrada:<30}Match: {lookahead}")
+            print(f"{' '.join(pila):<30}{' '.join(entrada):<30}Match: {lookahead}")
             pila.pop()
             entrada = entrada[1:]
         else: 
-            print(f"{' '.join(pila):<30}{entrada:<30}Pila is empty")
+            print(f"{' '.join(pila):<30}{' '.join(entrada):<30}Pila is empty")
             print("CADENA INVALIDA")
             break
     elif grammar[top]['tipo'] in ['I','V'] and lookahead in tabla[top] and tabla[top][lookahead]:
         pr = tabla[top][lookahead][0]
         # construimos la cadena de producción completa
         full = f"{reglas[pr]['Izq']} -> {' '.join(reglas[pr]['Der'])}"
-        print(f"{' '.join(pila):<30}{entrada:<30}Regla: {full}")
+        print(f"{' '.join(pila):<30}{' '.join(entrada):<30}Regla: {full}")
 
         pila.pop()
         rhs = reglas[pr]['Der']
@@ -253,21 +259,21 @@ while True:
             continue
         pila.extend(rhs[::-1])
     elif grammar[top]['tipo']=='T' and top==lookahead:
-        print(f"{' '.join(pila):<30}{entrada:<30}Match: {lookahead}")
+        print(f"{' '.join(pila):<30}{' '.join(entrada):<30}Match: {lookahead}")
         pila.pop()
         entrada = entrada[1:]
     elif lookahead == '$':
         #print(f"Extraer", end = "")
-        print(f"{' '.join(pila):<30}{entrada:<30}Extraer")
+        print(f"{' '.join(pila):<30}{' '.join(entrada):<30}Extraer")
         valid = False
         pila.pop()
     elif lookahead in grammar[top]['follow']:
         #print(f"{'Extraer':<20}", end = "")
-        print(f"{' '.join(pila):<30}{entrada:<30}Extraer")
+        print(f"{' '.join(pila):<30}{' '.join(entrada):<30}Extraer")
         valid = False
         pila.pop()
     else:
         #print(f"{'Explorar':<20}", end="")
-        print(f"{' '.join(pila):<30}{entrada:<30}Explorar")
+        print(f"{' '.join(pila):<30}{' '.join(entrada):<30}Explorar")
         valid = False
         entrada = entrada[1:]
