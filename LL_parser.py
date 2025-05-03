@@ -217,10 +217,10 @@ for nt, row in tabla.items():
 print("\nANÁLISIS")
 with open("input.txt") as f:
     inp = f.readline().strip() + '$'
-pila = start.copy()
+pila = ['$'] + start.copy()
 entrada = inp
 while True:
-    if not entrada or not pila:
+    if not entrada and not pila:
         print("CADENA VALIDA")
         break
     lookahead = entrada[0]
@@ -228,7 +228,16 @@ while True:
         entrada = entrada[1:]
         continue
     top = pila[-1]
-    if grammar[top]['tipo'] in ['I','V'] and lookahead in tabla[top] and tabla[top][lookahead]:
+    if top == '$':
+        if lookahead == '$':
+            print(f"{' '.join(pila):<30}{entrada:<30}Match: {lookahead}")
+            pila.pop()
+            entrada = entrada[1:]
+        else: 
+            print(f"{' '.join(pila):<30}{entrada:<30}Pila is empty")
+            print("CADENA INVALIDA")
+            break
+    elif grammar[top]['tipo'] in ['I','V'] and lookahead in tabla[top] and tabla[top][lookahead]:
         pr = tabla[top][lookahead][0]
         # construimos la cadena de producción completa
         full = f"{reglas[pr]['Izq']} -> {' '.join(reglas[pr]['Der'])}"
@@ -243,6 +252,15 @@ while True:
         print(f"{' '.join(pila):<30}{entrada:<30}Match: {lookahead}")
         pila.pop()
         entrada = entrada[1:]
+    elif lookahead == '$':
+        #print(f"Extraer", end = "")
+        print(f"{' '.join(pila):<30}{entrada:<30}Extraer")
+        pila.pop()
+    elif lookahead in grammar[top]['follow']:
+        #print(f"{'Extraer':<20}", end = "")
+        print(f"{' '.join(pila):<30}{entrada:<30}Extraer")
+        pila.pop()
     else:
-        print("Cadena no valida")
-        break
+        #print(f"{'Explorar':<20}", end="")
+        print(f"{' '.join(pila):<30}{entrada:<30}Explorar")
+        entrada = entrada[1:]
