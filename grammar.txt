@@ -1,4 +1,1 @@
-S -> A B C
-A -> a A | '
-B -> b
-C -> c | o
+S -> hola S | ( S ) S | '
