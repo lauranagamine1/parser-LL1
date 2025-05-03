@@ -212,6 +212,7 @@ for nt, row in tabla.items():
             print(f"{'Explorar':<20}", end="")
     print()
 
+valid = True
 
 # ANÁLISIS LL(1)
 print("\nANÁLISIS")
@@ -221,7 +222,10 @@ pila = ['$'] + start.copy()
 entrada = inp
 while True:
     if not entrada and not pila:
-        print("CADENA VALIDA")
+        if valid:
+            print("CADENA VALIDA")
+        else:
+            print("CADENA INVALIDA")
         break
     lookahead = entrada[0]
     if lookahead.isspace():
@@ -255,12 +259,15 @@ while True:
     elif lookahead == '$':
         #print(f"Extraer", end = "")
         print(f"{' '.join(pila):<30}{entrada:<30}Extraer")
+        valid = False
         pila.pop()
     elif lookahead in grammar[top]['follow']:
         #print(f"{'Extraer':<20}", end = "")
         print(f"{' '.join(pila):<30}{entrada:<30}Extraer")
+        valid = False
         pila.pop()
     else:
         #print(f"{'Explorar':<20}", end="")
         print(f"{' '.join(pila):<30}{entrada:<30}Explorar")
+        valid = False
         entrada = entrada[1:]
