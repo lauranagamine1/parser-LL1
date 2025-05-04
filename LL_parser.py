@@ -9,7 +9,6 @@ terminales = []
 t1 = sent[0].split(" ")
 start = [t1[0]]
 
-print(start)
 
 # SCANNER
 for production in sent:
@@ -53,7 +52,7 @@ for j in variables:
 # DICCIONARIO DE REGLAS
 archivo = open("grammar.txt","r")
 sent = archivo.readlines()
-print(sent)
+
 reglas ={}
 i=1
 
@@ -82,8 +81,7 @@ for i in range(len(sent)):
     sent[i]= sent[i][4:]
 j=0
 
-print(sent)
-print(reglas)
+
 
 for i in reglas.keys():
     reglas[i]['Der'] = []
@@ -92,7 +90,7 @@ for i in reglas.keys():
             reglas[i]['Der'].append(k)
     j+=1
 
-print("Reglas: ", reglas)
+
 
 # FIRST
 # regla 1: terminal
